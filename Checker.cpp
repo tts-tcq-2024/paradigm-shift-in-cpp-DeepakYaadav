@@ -1,5 +1,5 @@
+#include <assert.h>
 #include <iostream>
-#include <cassert>
 using namespace std;
 
 // Define status codes for error handling
@@ -10,53 +10,42 @@ enum BatteryStatus {
     CHARGE_RATE_OUT_OF_RANGE
 };
 
-// Battery class definition
-class Battery {
-public:
-    Battery(float temperature, float soc, float chargeRate)
-        : temperature_(temperature), soc_(soc), chargeRate_(chargeRate) {}
+// Function to check if value is in range
+BatteryStatus checkInRange(float value, float min, float max, BatteryStatus outOfRangeStatus) {
+    if (value < min || value > max) {
+        return outOfRangeStatus;
+    }
+    return BATTERY_OK;
+}
 
-    bool isOk() const {
-        BatteryStatus status = checkAll();
-        reportError(status);
-        return status == BATTERY_OK;
+bool batteryIsOk(float temperature, float soc, float chargeRate) {
+    BatteryStatus status;
+
+    // Check temperature
+    status = checkInRange(temperature, 0, 45, TEMPERATURE_OUT_OF_RANGE);
+    if (status != BATTERY_OK) {
+        cout << "Temperature out of range!\n";
+        return false;
     }
 
-private:
-    float temperature_;
-    float soc_;
-    float chargeRate_;
-
-    BatteryStatus checkAll() const {
-        if (temperature_ < 0 || temperature_ > 45) return TEMPERATURE_OUT_OF_RANGE;
-        if (soc_ < 20 || soc_ > 80) return SOC_OUT_OF_RANGE;
-        if (chargeRate_ > 0.8) return CHARGE_RATE_OUT_OF_RANGE;
-        return BATTERY_OK;
+    // Check SOC
+    status = checkInRange(soc, 20, 80, SOC_OUT_OF_RANGE);
+    if (status != BATTERY_OK) {
+        cout << "State of Charge out of range!\n";
+        return false;
     }
 
-    void reportError(BatteryStatus status) const {
-        switch (status) {
-            case TEMPERATURE_OUT_OF_RANGE:
-                cout << "Temperature out of range!\n";
-                break;
-            case SOC_OUT_OF_RANGE:
-                cout << "State of Charge out of range!\n";
-                break;
-            case CHARGE_RATE_OUT_OF_RANGE:
-                cout << "Charge Rate out of range!\n";
-                break;
-            default:
-                break;  // No error
-        }
+    // Check charge rate
+    status = checkInRange(chargeRate, 0, 0.8, CHARGE_RATE_OUT_OF_RANGE);
+    if (status != BATTERY_OK) {
+        cout << "Charge Rate out of range!\n";
+        return false;
     }
-};
+
+    return true;
+}
 
 int main() {
-    Battery battery1(25, 70, 0.7);
-    assert(battery1.isOk() == true);
-
-    Battery battery2(50, 85, 0);
-    assert(battery2.isOk() == false);
-
-    return 0;
+    assert(batteryIsOk(25, 70, 0.7) == true);
+    assert(batteryIsOk(50, 85, 0) == false);
 }

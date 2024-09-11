@@ -46,8 +46,7 @@ private:
                 cout << "Charge Rate out of range!\n";
                 break;
             default:
-                // No error
-                break;
+                break;  // No error
         }
     }
 };

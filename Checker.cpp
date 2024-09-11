@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <iostream>
 using namespace std;
 
@@ -16,29 +15,21 @@ BatteryStatus checkInRange(float value, float min, float max, BatteryStatus outO
 }
 
 bool batteryIsOk(float temperature, float soc, float chargeRate) {
-    // Combine all checks into a single condition
+    // Check all conditions in a single decision point
     BatteryStatus status = BATTERY_OK;
-    status = checkInRange(temperature, 0, 45, TEMPERATURE_OUT_OF_RANGE);
-    status = (status == BATTERY_OK) ? checkInRange(soc, 20, 80, SOC_OUT_OF_RANGE) : status;
-    status = (status == BATTERY_OK) ? checkInRange(chargeRate, 0, 0.8, CHARGE_RATE_OUT_OF_RANGE) : status;
-
-    if (status != BATTERY_OK) {
-        switch (status) {
-            case TEMPERATURE_OUT_OF_RANGE:
-                cout << "Temperature out of range!\n";
-                break;
-            case SOC_OUT_OF_RANGE:
-                cout << "State of Charge out of range!\n";
-                break;
-            case CHARGE_RATE_OUT_OF_RANGE:
-                cout << "Charge Rate out of range!\n";
-                break;
-            default:
-                break;
+    if (checkInRange(temperature, 0, 45, TEMPERATURE_OUT_OF_RANGE) != BATTERY_OK ||
+        checkInRange(soc, 20, 80, SOC_OUT_OF_RANGE) != BATTERY_OK ||
+        checkInRange(chargeRate, 0, 0.8, CHARGE_RATE_OUT_OF_RANGE) != BATTERY_OK) {
+        // Determine which error occurred
+        if (checkInRange(temperature, 0, 45, TEMPERATURE_OUT_OF_RANGE) != BATTERY_OK) {
+            cout << "Temperature out of range!\n";
+        } else if (checkInRange(soc, 20, 80, SOC_OUT_OF_RANGE) != BATTERY_OK) {
+            cout << "State of Charge out of range!\n";
+        } else if (checkInRange(chargeRate, 0, 0.8, CHARGE_RATE_OUT_OF_RANGE) != BATTERY_OK) {
+            cout << "Charge Rate out of range!\n";
         }
         return false;
     }
-
     return true;
 }
 

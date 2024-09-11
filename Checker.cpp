@@ -12,33 +12,30 @@ enum BatteryStatus {
 
 // Function to check if value is in range
 BatteryStatus checkInRange(float value, float min, float max, BatteryStatus outOfRangeStatus) {
-    if (value < min || value > max) {
-        return outOfRangeStatus;
-    }
-    return BATTERY_OK;
+    return (value < min || value > max) ? outOfRangeStatus : BATTERY_OK;
 }
 
 bool batteryIsOk(float temperature, float soc, float chargeRate) {
-    BatteryStatus status;
-
-    // Check temperature
+    // Combine all checks into a single condition
+    BatteryStatus status = BATTERY_OK;
     status = checkInRange(temperature, 0, 45, TEMPERATURE_OUT_OF_RANGE);
-    if (status != BATTERY_OK) {
-        cout << "Temperature out of range!\n";
-        return false;
-    }
+    status = (status == BATTERY_OK) ? checkInRange(soc, 20, 80, SOC_OUT_OF_RANGE) : status;
+    status = (status == BATTERY_OK) ? checkInRange(chargeRate, 0, 0.8, CHARGE_RATE_OUT_OF_RANGE) : status;
 
-    // Check SOC
-    status = checkInRange(soc, 20, 80, SOC_OUT_OF_RANGE);
     if (status != BATTERY_OK) {
-        cout << "State of Charge out of range!\n";
-        return false;
-    }
-
-    // Check charge rate
-    status = checkInRange(chargeRate, 0, 0.8, CHARGE_RATE_OUT_OF_RANGE);
-    if (status != BATTERY_OK) {
-        cout << "Charge Rate out of range!\n";
+        switch (status) {
+            case TEMPERATURE_OUT_OF_RANGE:
+                cout << "Temperature out of range!\n";
+                break;
+            case SOC_OUT_OF_RANGE:
+                cout << "State of Charge out of range!\n";
+                break;
+            case CHARGE_RATE_OUT_OF_RANGE:
+                cout << "Charge Rate out of range!\n";
+                break;
+            default:
+                break;
+        }
         return false;
     }
 

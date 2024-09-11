@@ -11,38 +11,38 @@ enum BatteryStatus {
 };
 
 // Function to check if a value is within a range
-BatteryStatus checkInRange(float value, float min, float max) {
-    return (value < min || value > max) ? TEMPERATURE_OUT_OF_RANGE : BATTERY_OK;
+BatteryStatus checkInRange(float value, float min, float max, BatteryStatus errorStatus) {
+    return (value < min || value > max) ? errorStatus : BATTERY_OK;
 }
 
-// Function to check temperature limits
-BatteryStatus checkTemperature(float temperature) {
-    return checkInRange(temperature, 0, 45);
-}
-
-// Function to check SOC limits
-BatteryStatus checkSoc(float soc) {
-    return checkInRange(soc, 20, 80);
-}
-
-// Function to check charge rate limits
-BatteryStatus checkChargeRate(float chargeRate) {
-    return checkInRange(chargeRate, 0, 0.8);
-}
-
+// Combined function to check all parameters
 bool batteryIsOk(float temperature, float soc, float chargeRate) {
-    if (checkTemperature(temperature) != BATTERY_OK) {
-        cout << "Temperature out of range!\n";
-        return false;
+    BatteryStatus status;
+
+    // Combine all checks into one logical expression
+    status = checkInRange(temperature, 0, 45, TEMPERATURE_OUT_OF_RANGE);
+    if (status == BATTERY_OK) {
+        status = checkInRange(soc, 20, 80, SOC_OUT_OF_RANGE);
+    }
+    if (status == BATTERY_OK) {
+        status = checkInRange(chargeRate, 0, 0.8, CHARGE_RATE_OUT_OF_RANGE);
     }
 
-    if (checkSoc(soc) != BATTERY_OK) {
-        cout << "State of Charge out of range!\n";
-        return false;
-    }
-
-    if (checkChargeRate(chargeRate) != BATTERY_OK) {
-        cout << "Charge Rate out of range!\n";
+    // Report error if any
+    if (status != BATTERY_OK) {
+        switch (status) {
+            case TEMPERATURE_OUT_OF_RANGE:
+                cout << "Temperature out of range!\n";
+                break;
+            case SOC_OUT_OF_RANGE:
+                cout << "State of Charge out of range!\n";
+                break;
+            case CHARGE_RATE_OUT_OF_RANGE:
+                cout << "Charge Rate out of range!\n";
+                break;
+            default:
+                break;
+        }
         return false;
     }
 

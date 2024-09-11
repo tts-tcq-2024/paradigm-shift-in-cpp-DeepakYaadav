@@ -17,21 +17,9 @@ public:
         : temperature_(temperature), soc_(soc), chargeRate_(chargeRate) {}
 
     bool isOk() const {
-        // Check all conditions in one place
-        BatteryStatus status = (temperature_ < 0 || temperature_ > 45) ? 
-                                TEMPERATURE_OUT_OF_RANGE :
-                                (soc_ < 20 || soc_ > 80) ? 
-                                SOC_OUT_OF_RANGE :
-                                (chargeRate_ > 0.8) ? 
-                                CHARGE_RATE_OUT_OF_RANGE :
-                                BATTERY_OK;
-
-        // Directly report error if status is not OK
-        if (status != BATTERY_OK) {
-            reportError(status);
-            return false;
-        }
-        return true;
+        BatteryStatus status = checkAll();
+        reportError(status);
+        return status == BATTERY_OK;
     }
 
 private:
@@ -39,13 +27,28 @@ private:
     float soc_;
     float chargeRate_;
 
+    BatteryStatus checkAll() const {
+        if (temperature_ < 0 || temperature_ > 45) return TEMPERATURE_OUT_OF_RANGE;
+        if (soc_ < 20 || soc_ > 80) return SOC_OUT_OF_RANGE;
+        if (chargeRate_ > 0.8) return CHARGE_RATE_OUT_OF_RANGE;
+        return BATTERY_OK;
+    }
+
     void reportError(BatteryStatus status) const {
-        static const char* errorMessages[] = {
-            "Temperature out of range!",
-            "State of Charge out of range!",
-            "Charge Rate out of range!"
-        };
-        cout << errorMessages[status - 1] << endl;
+        switch (status) {
+            case TEMPERATURE_OUT_OF_RANGE:
+                cout << "Temperature out of range!\n";
+                break;
+            case SOC_OUT_OF_RANGE:
+                cout << "State of Charge out of range!\n";
+                break;
+            case CHARGE_RATE_OUT_OF_RANGE:
+                cout << "Charge Rate out of range!\n";
+                break;
+            default:
+                // No error
+                break;
+        }
     }
 };
 

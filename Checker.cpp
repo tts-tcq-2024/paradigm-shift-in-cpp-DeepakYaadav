@@ -9,13 +9,9 @@ enum BatteryStatus {
     SOC_OUT_OF_RANGE,
     CHARGE_RATE_OUT_OF_RANGE
 };
-
-// Function to check if a value is within a range
 BatteryStatus checkInRange(float value, float min, float max, BatteryStatus errorStatus) {
     return (value < min || value > max) ? errorStatus : BATTERY_OK;
-}
-
-// Combined function to check all parameters
+}s
 bool batteryIsOk(float temperature, float soc, float chargeRate) {
     BatteryStatus status;
 

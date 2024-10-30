@@ -11,7 +11,7 @@ enum BatteryStatus {
 };
 BatteryStatus checkInRange(float value, float min, float max, BatteryStatus errorStatus) {
     return (value < min || value > max) ? errorStatus : BATTERY_OK;
-}s
+}
 bool batteryIsOk(float temperature, float soc, float chargeRate) {
     BatteryStatus status;
 
